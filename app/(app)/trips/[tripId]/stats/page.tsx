@@ -37,15 +37,21 @@ export default async function TripStatsPage({
   const avgPerDay = (days?.length ?? 0) > 0 ? totalSpent / days!.length : 0
   const budgetUsed = trip.budget ? (totalSpent / trip.budget) * 100 : null
 
-  const spendByCategory = (costs ?? []).reduce((acc, c) => {
+  const spendByCategory: Record<string, number> = (costs ?? []).reduce(
+  (acc: Record<string, number>, c) => {
     acc[c.category] = (acc[c.category] ?? 0) + (c.amount_inr ?? c.amount)
     return acc
-  }, {} as Record<string, number>)
+  },
+  {}
+)
 
-  const moodBreakdown = (days ?? []).reduce((acc, d) => {
+  const moodBreakdown: Record<string, number> = (days ?? []).reduce(
+  (acc: Record<string, number>, d) => {
     if (d.mood) acc[d.mood] = (acc[d.mood] ?? 0) + 1
     return acc
-  }, {} as Record<string, number>)
+  },
+  {}
+)
 
   const spendByDay = (days ?? []).map((d) => ({
     date: d.date,
@@ -151,8 +157,8 @@ export default async function TripStatsPage({
           <div className="bg-white rounded-2xl border border-stone-200 p-5">
             <h2 className="text-sm font-medium text-stone-700 mb-3">By category</h2>
             <div className="space-y-3">
-              {Object.entries(spendByCategory)
-                .sort((a, b) => b[1] - a[1])
+              {(Object.entries(spendByCategory) as [string, number][])
+  .sort((a, b) => b[1] - a[1])
                 .map(([cat, amount]) => {
                   const pct = totalSpent > 0
                     ? Math.round((amount / totalSpent) * 100)
@@ -186,8 +192,8 @@ export default async function TripStatsPage({
           <div className="bg-white rounded-2xl border border-stone-200 p-5">
             <h2 className="text-sm font-medium text-stone-700 mb-3">Mood log</h2>
             <div className="flex flex-wrap gap-2">
-              {Object.entries(moodBreakdown)
-                .sort((a, b) => b[1] - a[1])
+              {(Object.entries(moodBreakdown) as [string, number][])
+  .sort((a, b) => b[1] - a[1])
                 .map(([mood, count]) => (
                   <div
                     key={mood}
