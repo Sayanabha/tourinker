@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -8,17 +10,23 @@ import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { Loader2, MapPin, Mail } from 'lucide-react'
 
-export default function LoginPage() {
+function LoginContent() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [magicSent, setMagicSent] = useState(false)
-const supabase = useMemo(() => createClient(), [])
+  const supabase = useMemo(() => createClient(), [])
+  const searchParams = useSearchParams()
+  const isUnauthorized = searchParams.get('error') === 'unauthorized'
+
   async function handleMagicLink(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${window.location.origin}/callback` },
+      options: {
+        emailRedirectTo: `${window.location.origin}/callback`,
+        shouldCreateUser: true,
+      },
     })
     setLoading(false)
     if (error) {
@@ -30,6 +38,7 @@ const supabase = useMemo(() => createClient(), [])
 
   return (
     <div className="min-h-screen bg-stone-50 flex flex-col items-center justify-center px-4">
+      {/* Logo */}
       <div className="mb-10 flex flex-col items-center gap-2">
         <div className="w-12 h-12 bg-stone-900 rounded-2xl flex items-center justify-center">
           <MapPin className="w-6 h-6 text-stone-100" />
@@ -40,6 +49,14 @@ const supabase = useMemo(() => createClient(), [])
         <p className="text-sm text-stone-500">Your personal travel journal</p>
       </div>
 
+      {/* Unauthorized banner */}
+      {isUnauthorized && (
+        <div className="w-full max-w-sm mb-4 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700 text-center">
+          This journal is private. Only the owner can sign in.
+        </div>
+      )}
+
+      {/* Card */}
       <div className="w-full max-w-sm bg-white rounded-2xl border border-stone-200 p-6 shadow-sm">
         {magicSent ? (
           <div className="text-center py-6 space-y-3">
@@ -85,22 +102,22 @@ const supabase = useMemo(() => createClient(), [])
             </div>
 
             <Button
-  type="submit"
-  className="w-full bg-stone-900 hover:bg-stone-800 gap-2 font-medium"
-  disabled={loading}
->
-  {loading ? (
-    <>
-      <Loader2 className="w-4 h-4 animate-spin" />
-      Sending…
-    </>
-  ) : (
-    <>
-      <Mail className="w-4 h-4" />
-      Send magic link
-    </>
-  )}
-</Button>
+              type="submit"
+              className="w-full bg-stone-900 hover:bg-stone-800 gap-2 font-medium"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Mail className="w-4 h-4" />
+                  Send magic link
+                </>
+              )}
+            </Button>
           </form>
         )}
       </div>
@@ -109,5 +126,13 @@ const supabase = useMemo(() => createClient(), [])
         Your travel memories are private and stored securely.
       </p>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginContent />
+    </Suspense>
   )
 }
