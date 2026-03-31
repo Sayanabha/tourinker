@@ -15,6 +15,7 @@ import {
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { Loader2, LogOut } from 'lucide-react'
+import ThemeToggle from '@/components/shared/ThemeToggle' // ✅ added
 
 export default function SettingsForm({
   profile,
@@ -96,6 +97,17 @@ export default function SettingsForm({
             Save settings
           </Button>
         </form>
+      </div>
+
+      {/* Appearance ✅ added */}
+      <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 p-5">
+        <h2 className="text-sm font-medium text-stone-700 dark:text-stone-300 mb-4">
+          Appearance
+        </h2>
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-stone-600 dark:text-stone-400">Theme</p>
+          <ThemeToggle />
+        </div>
       </div>
 
       {/* Danger zone */}
